@@ -1,0 +1,148 @@
+package main
+
+import (
+	"fmt"
+	"github.com/cloudfoundry-community/go-cfclient"
+	"net/url"
+	"os"
+)
+
+const AppDServiceName = "appdynamics"
+const UpgradeCSVFile = "appd-upgrade.csv"
+const UpgradeScriptFile = "1_appd-upgrade.sh"
+const ServiceBindingsScriptFile = "2_appd-bindings.sh"
+const RestageAppsScriptFile = "3_appd-restage.sh"
+
+
+type InstanceInfo struct {
+	OrgName string
+	SpaceName string
+	ServiceName string
+	PlanName string
+	ServiceInstanceName string
+	BoundApps []string
+}
+
+func main() {
+	config := &cfclient.Config{
+		ApiAddress:        os.Getenv("CF_TARGET"),
+		Username:          os.Getenv("CF_ADMIN_USERNAME"),
+		Password:          os.Getenv("CF_ADMIN_PASSWORD"),
+		SkipSslValidation: true,
+	}
+	fmt.Printf("Using configuration {%v:%v} for CF Controller %v\n", config.Username, config.Password,
+		config.ApiAddress)
+	if client, err := cfclient.NewClient(config); err != nil {
+		fmt.Printf("unable to create cf client, exiting %v", err)
+		return
+	} else {
+		if err := writeUpgradeFiles(client); err != nil {
+			fmt.Printf("Upgarde files failed %v", err)
+		}
+	}
+}
+
+
+
+func writeUpgradeFiles(client *cfclient.Client) error {
+	sids, _ := client.ListServiceInstances()
+
+	csvFile, err := os.OpenFile(UpgradeCSVFile, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer csvFile.Close()
+
+	shFile, err := os.OpenFile(UpgradeScriptFile, os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		return err
+	}
+	defer shFile.Close()
+
+	appdBindingsFile, err := os.OpenFile(ServiceBindingsScriptFile, os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		return err
+	}
+	defer appdBindingsFile.Close()
+
+	restageFile, err := os.OpenFile(RestageAppsScriptFile, os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		return err
+	}
+	defer restageFile.Close()
+
+
+	for _, sid := range sids {
+		if service, err := client.GetServiceByGuid(sid.ServiceGuid); err == nil && service.Label == AppDServiceName {
+			plan, err := client.GetServicePlanByGUID(sid.ServicePlanGuid)
+			if err != nil {
+				fmt.Printf("%v", err)
+			}
+			space, err := client.GetSpaceByGuid(sid.SpaceGuid)
+			if err != nil {
+				fmt.Printf("%v", err)
+			}
+			org, err := space.Org()
+			if err != nil {
+				fmt.Printf("%v", err)
+			}
+
+			v := url.Values{}
+			v.Set("q", fmt.Sprintf("service_instance_guid:%s",sid.Guid))
+			bindings, err := client.ListServiceBindingsByQuery(v)
+			if err != nil {
+				fmt.Printf("%v", err)
+			}
+
+			fmt.Printf("writing info for %s, %s, %s, %s, %s\n", org.Name, space.Name, service.Label, plan.Name, sid.Name)
+
+			csvString := fmt.Sprintf("%s,%s,%s,%s,%s\n", org.Name, space.Name, service.Label, plan.Name,
+				sid.Name)
+			if _, err := csvFile.Write([]byte(csvString)); err != nil {
+				return err
+			}
+
+			shString := fmt.Sprintf("cf target -o %s -s %s\n", org.Name, space.Name)
+			shString += fmt.Sprintf("cf create-service %s %s %s\n", service.Label, plan.Name, sid.Name)
+			if _, err := shFile.Write([]byte(shString)); err != nil {
+				return err
+			}
+
+
+			bindingString := ""
+			restageString := ""
+			for _, binding := range bindings {
+				app, _ := client.GetAppByGuid(binding.AppGuid)
+				fmt.Printf("Binding found:  Application: %s - ServiceInstance: %s\n", app.Name, sid.Name)
+				bindingString += fmt.Sprintf("cf bind-service %s %s\n", app.Name, sid.Name)
+				restageString += fmt.Sprintf("cf restage %s\n", app.Name)
+			}
+			if _, err := appdBindingsFile.Write([]byte(bindingString)); err != nil {
+				return err
+			}
+			if _, err := restageFile.Write([]byte(restageString)); err != nil {
+				return err
+			}
+
+		}
+	}
+
+
+	if err := csvFile.Close(); err != nil {
+		return err
+	}
+
+	if err := shFile.Close(); err != nil {
+		return err
+	}
+
+	if err := appdBindingsFile.Close(); err != nil {
+		return err
+	}
+
+	if err := restageFile.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
