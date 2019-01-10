@@ -11,7 +11,7 @@ As 1.x -> 4.x upgrades are not supported in PCF. The tool generates scripts that
 ```
 export CF_ADMIN_USERNAME=admin
 export CF_ADMIN_PASSWORD=<pwd>
-export CF_TARGET=https://apps.sys.pie-multi-az-blue.cfplatformeng.com
+export CF_TARGET=https://api.sys.pie-multi-az-blue.cfplatformeng.com
 ```
 
 `CF_TARGET` is the api endpoint. You can find it by doing 
