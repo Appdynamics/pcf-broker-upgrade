@@ -21,6 +21,8 @@ $ cf api
 api endpoint:   https://api.sys.pie-multi-az-blue.cfplatformeng.com
 ```
 
+### Run the tool 
+
 
 1. Download the [tool](https://github.com/Appdynamics/pcf-broker-upgrade/releases)  Run the tool before deleting the 1.x tile 
 
@@ -34,6 +36,9 @@ writing info for appdynamics-org, appdynamics-space, appdynamics, appdNoSSL, app
 Binding found:  Application: cf-python - ServiceInstance: appd
 
 ```
+
+### Verify the generated scripts 
+
 
 2. The tool generates 4 files 
 ```
@@ -69,6 +74,9 @@ cf bind-service cf-python appd
 $ cat 3_appd-restage.sh 
 cf restage cf-python
 ```
+
+### Run the generated scripts post 4.x install
+
 
 5. Once the 1.x tile is uninstalled. Install 4.x tile and create plans with same names as before
 
