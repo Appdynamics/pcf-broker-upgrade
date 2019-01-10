@@ -2,7 +2,7 @@
 
 This tool assists in upgrading 1.x to 4.x AppDynamics Service Broker tile. 
 
-As 1.x -> 4.x upgrades are not supported in PCF. The tool generates scripts that can be applied for recreating AppDynamics Service instances that have existed as before and also a seperate tool to bind the service instances to the apps (if needed)
+As 1.x -> 4.x upgrades are not supported in PCF. The tool generates scripts that can be applied for recreating AppDynamics Service instances that have existed as before along with a seperate script to bind the service instances to the apps (if needed)
 
 ## Usage 
 
