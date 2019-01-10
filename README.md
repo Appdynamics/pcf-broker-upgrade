@@ -21,10 +21,10 @@ $ cf api
 api endpoint:   https://api.sys.pie-multi-az-blue.cfplatformeng.com
 ```
 
-### Run the tool 
+### Run the tool pre 4.x install
 
 
-1. Download the [tool](https://github.com/Appdynamics/pcf-broker-upgrade/releases)  Run the tool before deleting the 1.x tile 
+1. Download the [tool](https://github.com/Appdynamics/pcf-broker-upgrade/releases) and before deleting the 1.x tile 
 
 ```
 $ ./appd-broker-upgrades 
