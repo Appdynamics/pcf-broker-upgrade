@@ -22,10 +22,10 @@ api endpoint:   https://api.sys.pie-multi-az-blue.cfplatformeng.com
 ```
 
 
-1. Download the [tool]()  Run the tool before deleting the 1.x tile 
+1. Download the [tool](https://github.com/Appdynamics/pcf-broker-upgrade/releases)  Run the tool before deleting the 1.x tile 
 
 ```
-$ ./broker-upgrades 
+$ ./appd-broker-upgrades 
 
 writing info for appdynamics-org, appdynamics-space, appdynamics, appd454Controller, appd454
 writing info for appdynamics-org, appdynamics-space, appdynamics, appdOther, appdOther
