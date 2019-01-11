@@ -94,3 +94,9 @@ $ cat 3_appd-restage.sh
 6. Then apply scripts 1_appd-upgrade.sh, 2_appd-bindings.sh (if needed), 3_appd-restage.sh (if needed)
 
 
+## Building the Binaries
+
+```
+$ GOOS=darwin  go build -ldflags="-s -w" -o bin/appd-broker-upgrade-mac
+$ GOOS=linux  go build -ldflags="-s -w" -o bin/appd-broker-upgrade
+$ GOOS=windows  go build -ldflags="-s -w" -o bin/appd-broker-upgrade.exe
