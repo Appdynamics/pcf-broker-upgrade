@@ -31,8 +31,7 @@ func main() {
 		SkipSslValidation: true,
 	}
 
-	fmt.Printf("Using configuration {%v:%v} for CF Controller %v\n", config.Username, config.Password,
-		config.ApiAddress)
+	fmt.Printf("Using configuration {%v:****} for CF Controller %v\n", config.Username, config.ApiAddress)
 
 	client, err := cfclient.NewClient(config)
 	if err != nil {
@@ -51,11 +50,11 @@ func main() {
 	}
 
 	if err := WriteUpgradeScript(instancesInfo); err != nil {
-		fmt.Printf("Writing Upgrade script %s file failed %v", UpgradeScriptFile, err)
+		fmt.Printf("Writing Upgrade script %s failed %v", UpgradeScriptFile, err)
 	}
 
 	if err := WriteBindScripts(instancesInfo); err != nil {
-		fmt.Printf("Writing binding script %s, %s file failed %v", ServiceBindingsScriptFile,
+		fmt.Printf("Writing Binding scripts %s, %s  failed %v", ServiceBindingsScriptFile,
 			RestageAppsScriptFile, err)
 	}
 
@@ -98,7 +97,9 @@ func WriteBindScripts(instanceInfos []InstanceInfo) error {
 	for _, instance := range instanceInfos {
 		boundApps := instance.BoundApps
 		for _, app := range boundApps {
+			bindingString += fmt.Sprintf("cf target -o %s -s %s\n", instance.OrgName, instance.SpaceName)
 			bindingString += fmt.Sprintf("cf bind-service %s %s\n", app, instance.ServiceInstanceName)
+			restageString += fmt.Sprintf("cf target -o %s -s %s\n", instance.OrgName, instance.SpaceName)
 			restageString += fmt.Sprintf("cf restage %s\n", app)
 		}
 	}

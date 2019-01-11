@@ -11,14 +11,14 @@ As 1.x -> 4.x upgrades are not supported in PCF. The tool generates scripts that
 ```
 export CF_ADMIN_USERNAME=admin
 export CF_ADMIN_PASSWORD=<pwd>
-export CF_TARGET=https://api.sys.pie-multi-az-blue.cfplatformeng.com
+export CF_TARGET=https://api.sys.cfplatformeng.com
 ```
 
 `CF_TARGET` is the api endpoint. You can find it by doing 
 
 ```
 $ cf api
-api endpoint:   https://api.sys.pie-multi-az-blue.cfplatformeng.com
+api endpoint:   https://api.sys.cfplatformeng.com
 ```
 
 ### Run the tool pre 4.x install
@@ -60,19 +60,30 @@ appdynamics-org,appdynamics-space,appdynamics,appdNoSSL,appd
 
 ```
 $ cat 1_appd-upgrade.sh 
-cf target -o appdynamics-org -s appdynamics-space
-cf create-service appdynamics appd454Controller appd454
-cf target -o appdynamics-org -s appdynamics-space
+  cf target -o appdynamics-org -s appdynamics-space
+  cf create-service appdynamics appd454Controller appd454
+  cf target -o appdynamics-org -s appdynamics-space
+  cf create-service appdynamics appdOther appdOther
+  cf target -o appdynamics-org -s appdynamics-space
+  cf create-service appdynamics appdNoSSL appd-python
+  cf target -o appdynamics-org -s appdynamics-space
+  cf create-service appdynamics appdNoSSL appd
 ```
 
 ```
 $ cat 2_appd-bindings.sh 
-cf bind-service cf-python appd
+ cf target -o appdynamics-org -s appdynamics-space
+ cf bind-service cf-python appd
+ cf target -o appdynamics-org -s appdynamics-space
+ cf bind-service cf-python-2 appd
 ```
 
 ```
 $ cat 3_appd-restage.sh 
-cf restage cf-python
+ cf target -o appdynamics-org -s appdynamics-space
+ cf restage cf-python
+ cf target -o appdynamics-org -s appdynamics-space
+ cf restage cf-python-2
 ```
 
 ### Run the generated scripts post 4.x install
